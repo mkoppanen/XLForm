@@ -554,9 +554,7 @@
             return YES;
         }
     }
-    if ([cell respondsToSelector:@selector(formDescriptorCellResignFirstResponder)]){
-        [cell formDescriptorCellResignFirstResponder];
-    }
+    [self.tableView endEditing:YES];
     return YES;
 }
 
@@ -629,7 +627,6 @@
 {
     return self.navigationBetweenFieldsAccessoryView;
 }
-
 
 #pragma mark - XLFormNavigationBetweenFieldsDelegate
 

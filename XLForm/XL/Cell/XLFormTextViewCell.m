@@ -116,11 +116,6 @@ NSString *const kFormTextViewCellPlaceholder = @"placeholder";
     return [self.textView becomeFirstResponder];
 }
 
--(BOOL)formDescriptorCellResignFirstResponder
-{
-    return [self.textView resignFirstResponder];
-}
-
 #pragma mark - Constraints
 
 -(void)updateConstraints
