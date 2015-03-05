@@ -71,5 +71,15 @@
     return nil;
 }
 
+#pragma mark - Navigation Between Fields
+
+-(UIView *)inputAccessoryView
+{
+    XLFormDescriptor * formDescriptor = self.formViewController.form;
+    if (formDescriptor.supportNavigationBetweenFields){
+        return [self.formViewController inputAccessoryViewForRowDescriptor:self.rowDescriptor];
+    }
+    return [super inputAccessoryView];
+}
 
 @end

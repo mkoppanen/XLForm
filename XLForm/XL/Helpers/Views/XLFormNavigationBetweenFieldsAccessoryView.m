@@ -108,17 +108,17 @@
 
 -(void)previousButtonTapped:(id)sender
 {
-    if ([self.delegate respondsToSelector:@selector(previous:)])
+    if ([self.delegate respondsToSelector:@selector(previousField:)])
     {
-        [self.delegate previous:self];
+        [self.delegate previousField:self];
     }
 }
 
 -(void)nextButtonTapped:(id)sender
 {
-    if ([self.delegate respondsToSelector:@selector(next:)])
+    if ([self.delegate respondsToSelector:@selector(nextField:)])
     {
-        [self.delegate next:self];
+        [self.delegate nextField:self];
     }
 }
 

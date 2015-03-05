@@ -28,15 +28,33 @@
 #import "XLFormViewController.h"
 #import "UIView+XLFormAdditions.h"
 #import "XLForm.h"
+#import "XLFormNavigationBetweenFieldsAccessoryView.h"
 
 
-@interface XLFormViewController()
+@interface XLFormViewController() <XLFormNavigationBetweenFieldsDelegate>
 
 @property UITableViewStyle tableViewStyle;
+@property (nonatomic)  XLFormNavigationBetweenFieldsAccessoryView * navigationBetweenFieldsAccessoryView;
 
 @end
 
 @implementation XLFormViewController
+
+@synthesize navigationBetweenFieldsAccessoryView = _navigationBetweenFieldsAccessoryView;
+
+#pragma mark - Properties
+
+-(XLFormNavigationBetweenFieldsAccessoryView *)navigationBetweenFieldsAccessoryView
+{
+    if (_navigationBetweenFieldsAccessoryView) return _navigationBetweenFieldsAccessoryView;
+    
+    _navigationBetweenFieldsAccessoryView = [XLFormNavigationBetweenFieldsAccessoryView new];
+    [_navigationBetweenFieldsAccessoryView setDelegate:self];
+    
+    return _navigationBetweenFieldsAccessoryView;
+}
+
+#pragma mark - Initialization
 
 -(id)initWithForm:(XLFormDescriptor *)form
 {
@@ -485,7 +503,7 @@
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     XLFormRowDescriptor *rowDescriptor = [self.form formRowAtIndex:indexPath];
-    Class cellClass = rowDescriptor.cellClass ?: [XLFormViewController cellClassesForRowDescriptorTypes][rowDescriptor.rowType];
+    Class cellClass = [[rowDescriptor cellForFormController:self] class];
     if ([cellClass respondsToSelector:@selector(formDescriptorCellHeightForRowDescriptor:)]){
         return [cellClass formDescriptorCellHeightForRowDescriptor:rowDescriptor];
     }
@@ -603,6 +621,148 @@
             rowDescriptorViewController.rowDescriptor = rowDescriptor;
         }
     }
+}
+
+#pragma mark - Navigation Between Fields
+
+-(UIView *)inputAccessoryViewForRowDescriptor:(XLFormRowDescriptor *)rowDescriptor
+{
+    return self.navigationBetweenFieldsAccessoryView;
+}
+
+
+#pragma mark - XLFormNavigationBetweenFieldsDelegate
+
+-(void)previousField:(XLFormNavigationBetweenFieldsAccessoryView *)sender
+{
+    [self navigateFirstResponderToDirection:XLFormNavigationBetweenFieldsDirectionPrevious];
+}
+
+-(void)nextField:(XLFormNavigationBetweenFieldsAccessoryView *)sender
+{
+    [self navigateFirstResponderToDirection:XLFormNavigationBetweenFieldsDirectionNext];
+}
+
+-(void)done:(XLFormNavigationBetweenFieldsAccessoryView *)sender
+{
+    [self.tableView endEditing:YES];
+}
+
+
+-(void)navigateFirstResponderToDirection:(XLFormNavigationBetweenFieldsDirection)direction
+{
+    UIView * firstResponder = [self.tableView findFirstResponder];
+    UITableViewCell<XLFormDescriptorCell> * cell = [firstResponder formDescriptorCell];
+    NSIndexPath * currentIndexPath = [self.tableView indexPathForCell:cell];
+
+    if (direction == XLFormNavigationBetweenFieldsDirectionNext){
+        NSIndexPath * nextIndexPath = [self auxNextIndexPath:currentIndexPath];
+        if (!nextIndexPath) {
+            return;
+        }
+        
+        NSIndexPath * nextNextIndexPath = [self auxNextIndexPath:nextIndexPath];
+        BOOL enableNextButton = NO;
+        if (nextNextIndexPath){
+            XLFormRowDescriptor * row = [self.form formRowAtIndex:nextNextIndexPath];
+            UITableViewCell<XLFormDescriptorCell> * cell = (UITableViewCell<XLFormDescriptorCell> *)[row cellForFormController:self];
+            if ([cell respondsToSelector:@selector(formDescriptorCellBecomeFirstResponder)]){
+                enableNextButton = YES;
+            }
+        }
+
+        [self.navigationBetweenFieldsAccessoryView enablePreviousButton:YES];
+        [self.navigationBetweenFieldsAccessoryView enableNextButton:enableNextButton];
+        [self.tableView scrollToRowAtIndexPath:nextIndexPath atScrollPosition:UITableViewScrollPositionNone animated:NO];
+        [self becomeFirstResponderCellForIndexPath:nextIndexPath];
+    }
+    else {
+        NSIndexPath * previousIndexPath = [self auxPreviousIndexPath:currentIndexPath];
+        if (!previousIndexPath) {
+            return;
+        }
+        
+//        NSIndexPath * previousPreviousIndexPath = [self auxPreviousIndexPath:previousIndexPath];
+//        BOOL enablePreviousButton = NO;
+//        if (previousPreviousIndexPath){
+//            XLFormRowDescriptor * row = [self.form formRowAtIndex:previousPreviousIndexPath];
+//            UITableViewCell<XLFormDescriptorCell> * cell = (UITableViewCell<XLFormDescriptorCell> *)[row cellForFormController:self];
+//            if ([cell respondsToSelector:@selector(formDescriptorCellBecomeFirstResponder)]){
+//                enablePreviousButton = YES;
+//            }
+//        }
+//
+//        [self.navigationBetweenFieldsAccessoryView enablePreviousButton:enablePreviousButton];
+//        [self.navigationBetweenFieldsAccessoryView enableNextButton:YES];
+        [self.tableView scrollToRowAtIndexPath:previousIndexPath atScrollPosition:UITableViewScrollPositionNone animated:NO];
+        [self becomeFirstResponderCellForIndexPath:previousIndexPath];
+    }
+}
+
+-(void)becomeFirstResponderCellForIndexPath:(NSIndexPath *)indexPath
+{
+    XLFormRowDescriptor * row = [self.form formRowAtIndex:indexPath];
+    UITableViewCell<XLFormDescriptorCell> * cell = (UITableViewCell<XLFormDescriptorCell> *)[row cellForFormController:self];
+    if ([cell respondsToSelector:@selector(formDescriptorCellBecomeFirstResponder)]){
+        [cell formDescriptorCellBecomeFirstResponder];
+    }
+}
+
+- (NSIndexPath *)auxNextIndexPath:(NSIndexPath *)currentIndexPath
+{
+    NSIndexPath *nextIndexPath = nil;
+
+    NSInteger currentSection = currentIndexPath.section;
+    NSInteger currentRow = currentIndexPath.row;
+    
+    
+    NSInteger currentSectionRowsCount = [self.tableView numberOfRowsInSection:currentSection];
+    
+    NSInteger nextRow = currentRow + 1;
+
+    if (nextRow < currentSectionRowsCount)
+    {
+        nextIndexPath = [NSIndexPath indexPathForRow:nextRow inSection:currentSection];
+    }
+    else
+    {
+        NSInteger sectionCount = [self.tableView numberOfSections];
+        NSInteger nextSection = currentSection + 1;
+        if (nextSection < sectionCount)
+        {
+            NSInteger nextSectionRowsCount = [self.tableView numberOfRowsInSection:nextSection];
+            if (nextSectionRowsCount > 0){
+                nextIndexPath = [NSIndexPath indexPathForRow:0 inSection:nextSection];
+            }
+        }
+    }
+    return nextIndexPath;
+}
+- (NSIndexPath *)auxPreviousIndexPath:(NSIndexPath *)currentIndexPath
+{
+    NSIndexPath *previousIndexPath = nil;
+    
+    NSInteger currentSection = currentIndexPath.section;
+    NSInteger currentRow = currentIndexPath.row;
+    
+    NSInteger previousRow = currentRow - 1;
+    
+    if (previousRow >= 0)
+    {
+        previousIndexPath = [NSIndexPath indexPathForRow:previousRow inSection:currentSection];
+    }
+    else
+    {
+        NSInteger previousSection = currentSection - 1;
+        if (previousSection >= 0)
+        {
+            NSInteger previousSectionRowsCount = [self.tableView numberOfRowsInSection:previousSection];
+            if (previousSectionRowsCount > 0){
+                previousIndexPath = [NSIndexPath indexPathForRow:(previousSectionRowsCount -1) inSection:previousSection];
+            }
+        }
+    }
+    return previousIndexPath;
 }
 
 @end

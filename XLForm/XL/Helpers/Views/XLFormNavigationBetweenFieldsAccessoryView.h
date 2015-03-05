@@ -8,14 +8,19 @@
 
 #import <UIKit/UIKit.h>
 
+typedef enum
+{
+    XLFormNavigationBetweenFieldsDirectionPrevious = 0,
+    XLFormNavigationBetweenFieldsDirectionNext
+} XLFormNavigationBetweenFieldsDirection;
 
 @class XLFormNavigationBetweenFieldsAccessoryView;
 
 @protocol XLFormNavigationBetweenFieldsDelegate <NSObject>
 
 @optional
--(void)previous:(XLFormNavigationBetweenFieldsAccessoryView *)sender;
--(void)next:(XLFormNavigationBetweenFieldsAccessoryView *)sender;
+-(void)previousField:(XLFormNavigationBetweenFieldsAccessoryView *)sender;
+-(void)nextField:(XLFormNavigationBetweenFieldsAccessoryView *)sender;
 -(void)done:(XLFormNavigationBetweenFieldsAccessoryView *)sender;
 @end
 
