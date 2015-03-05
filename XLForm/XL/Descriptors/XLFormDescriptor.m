@@ -393,4 +393,44 @@ NSString * const XLValidationStatusErrorKey = @"XLValidationStatusErrorKey";
 }
 
 
+
+#pragma mark - Helpers
+
+-(XLFormRowDescriptor *)nextRowDescriptorForRow:(XLFormRowDescriptor *)currentRow
+{
+    XLFormRowDescriptor * nextRow = nil;
+    NSMutableArray * allRows = [NSMutableArray new];
+    for (XLFormSectionDescriptor * section in self.formSections){
+        [allRows addObjectsFromArray:section.formRows];
+    }
+    
+    NSInteger currentIndex = [allRows indexOfObject:currentRow];
+    if (currentIndex != NSNotFound){
+        NSInteger newIndex = currentIndex + 1;
+        if (newIndex <  [allRows count]){
+            nextRow = [allRows objectAtIndex:newIndex];
+        }
+    }
+    return nextRow;
+}
+
+
+-(XLFormRowDescriptor *)previousRowDescriptorForRow:(XLFormRowDescriptor *)currentRow
+{
+    XLFormRowDescriptor * previousRow = nil;
+    NSMutableArray * allRows = [NSMutableArray new];
+    for (XLFormSectionDescriptor * section in self.formSections){
+        [allRows addObjectsFromArray:section.formRows];
+    }
+    
+    NSInteger currentIndex = [allRows indexOfObject:currentRow];
+    if (currentIndex != NSNotFound){
+        NSInteger previousIndex = currentIndex - 1;
+        if (previousIndex >= 0){
+            previousRow = [allRows objectAtIndex:previousIndex];
+        }
+    }
+    return previousRow;
+}
+
 @end

@@ -12,11 +12,8 @@
 @interface XLFormNavigationBetweenFieldsAccessoryView ()
 @property (nonatomic, strong) UIToolbar *toolBar;
 
-@property (nonatomic, strong) UIBarButtonItem *previousButton;
 @property (nonatomic, strong) UIBarButtonItem *fixedSpace;
-@property (nonatomic, strong) UIBarButtonItem *nextButton;
 @property (nonatomic, strong) UIBarButtonItem *flexibleSpace;
-@property (nonatomic, strong) UIBarButtonItem *doneButton;
 
 @end
 
@@ -52,7 +49,7 @@
 {
     if (_previousButton) return _previousButton;
 #warning 105 is undocumented, it could get your app rejected from the app store
-    _previousButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:105 target:self action:@selector(previousButtonTapped:)];
+    _previousButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:105 target:nil action:nil];
     return _previousButton;
 }
 
@@ -68,7 +65,7 @@
 {
     if (_nextButton) return _nextButton;
 #warning 106 is undocumented, it could get your app rejected from the app store
-    _nextButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:106 target:self action:@selector(nextButtonTapped:)];
+    _nextButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:106 target:nil action:nil];
     return _nextButton;
 }
 
@@ -83,7 +80,7 @@
 {
     if (_doneButton) return _doneButton;
 
-    _doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneButtonTapped:)];
+    _doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:nil action:nil];
     return _doneButton;
 }
 
@@ -102,44 +99,6 @@
     
     [_toolBar setItems:items];
     return _toolBar;
-}
-
-#pragma mark - Actions
-
--(void)previousButtonTapped:(id)sender
-{
-    if ([self.delegate respondsToSelector:@selector(previousField:)])
-    {
-        [self.delegate previousField:self];
-    }
-}
-
--(void)nextButtonTapped:(id)sender
-{
-    if ([self.delegate respondsToSelector:@selector(nextField:)])
-    {
-        [self.delegate nextField:self];
-    }
-}
-
-- (void)doneButtonTapped:(id)sender
-{
-    if ([self.delegate respondsToSelector:@selector(done:)])
-    {
-        [self.delegate done:self];
-    }
-}
-
-#pragma mark - Enable / Disable 
-
--(void)enablePreviousButton:(BOOL)enable
-{
-    [self.previousButton setEnabled:enable];
-}
-
--(void)enableNextButton:(BOOL)enable
-{
-    [self.nextButton setEnabled:enable];
 }
 
 #pragma mark - Helpers

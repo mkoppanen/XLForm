@@ -14,22 +14,11 @@ typedef enum
     XLFormNavigationBetweenFieldsDirectionNext
 } XLFormNavigationBetweenFieldsDirection;
 
-@class XLFormNavigationBetweenFieldsAccessoryView;
-
-@protocol XLFormNavigationBetweenFieldsDelegate <NSObject>
-
-@optional
--(void)previousField:(XLFormNavigationBetweenFieldsAccessoryView *)sender;
--(void)nextField:(XLFormNavigationBetweenFieldsAccessoryView *)sender;
--(void)done:(XLFormNavigationBetweenFieldsAccessoryView *)sender;
-@end
-
 
 @interface XLFormNavigationBetweenFieldsAccessoryView : UIView
 
-@property (nonatomic, weak) id<XLFormNavigationBetweenFieldsDelegate> delegate;
-
--(void)enablePreviousButton:(BOOL)enable;
--(void)enableNextButton:(BOOL)enable;
+@property (nonatomic, strong) UIBarButtonItem *previousButton;
+@property (nonatomic, strong) UIBarButtonItem *nextButton;
+@property (nonatomic, strong) UIBarButtonItem *doneButton;
 
 @end
