@@ -6,11 +6,10 @@
 //  Copyright (c) 2015 Xmartlabs. All rights reserved.
 //
 
-#import "XLFormDefaultInputAccessoryView.h"
+#import "XLFormNavigationBetweenFieldsAccessoryView.h"
 
-#define P
 
-@interface XLFormDefaultInputAccessoryView ()
+@interface XLFormNavigationBetweenFieldsAccessoryView ()
 @property (nonatomic, strong) UIToolbar *toolBar;
 
 @property (nonatomic, strong) UIBarButtonItem *previousButton;
@@ -21,7 +20,7 @@
 
 @end
 
-@implementation XLFormDefaultInputAccessoryView
+@implementation XLFormNavigationBetweenFieldsAccessoryView
 
 @synthesize toolBar = _toolBar;
 @synthesize previousButton = _previousButton;
