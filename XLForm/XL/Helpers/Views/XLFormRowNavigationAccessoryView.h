@@ -10,12 +10,12 @@
 
 typedef enum
 {
-    XLFormNavigationBetweenFieldsDirectionPrevious = 0,
-    XLFormNavigationBetweenFieldsDirectionNext
-} XLFormNavigationBetweenFieldsDirection;
+    XLFormRowNavigationDirectionPrevious = 0,
+    XLFormRowNavigationDirectionNext
+} XLFormRowNavigationDirection;
 
 
-@interface XLFormNavigationBetweenFieldsAccessoryView : UIView
+@interface XLFormRowNavigationAccessoryView : UIView
 
 @property (nonatomic, strong) UIBarButtonItem *previousButton;
 @property (nonatomic, strong) UIBarButtonItem *nextButton;

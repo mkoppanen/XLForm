@@ -6,10 +6,10 @@
 //  Copyright (c) 2015 Xmartlabs. All rights reserved.
 //
 
-#import "XLFormNavigationBetweenFieldsAccessoryView.h"
+#import "XLFormRowNavigationAccessoryView.h"
 
 
-@interface XLFormNavigationBetweenFieldsAccessoryView ()
+@interface XLFormRowNavigationAccessoryView ()
 @property (nonatomic, strong) UIToolbar *toolBar;
 
 @property (nonatomic, strong) UIBarButtonItem *fixedSpace;
@@ -17,7 +17,7 @@
 
 @end
 
-@implementation XLFormNavigationBetweenFieldsAccessoryView
+@implementation XLFormRowNavigationAccessoryView
 
 @synthesize toolBar = _toolBar;
 @synthesize previousButton = _previousButton;
@@ -114,5 +114,11 @@
 {
     return  44.0f;
 }
+
+
+- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent *)event
+{
+}
+
 
 @end

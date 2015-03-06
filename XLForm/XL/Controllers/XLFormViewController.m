@@ -28,38 +28,43 @@
 #import "XLFormViewController.h"
 #import "UIView+XLFormAdditions.h"
 #import "XLForm.h"
-#import "XLFormNavigationBetweenFieldsAccessoryView.h"
+#import "XLFormRowNavigationAccessoryView.h"
 
+typedef NS_ENUM(NSUInteger, XLFormNavigationType) {
+    XLFormNavigationTypeStop = 0,
+    XLFormNavigationTypeSkip,
+    XLFormNavigationTypeStay
+};
 
 @interface XLFormViewController()
 
 @property UITableViewStyle tableViewStyle;
-@property (nonatomic)  XLFormNavigationBetweenFieldsAccessoryView * navigationBetweenFieldsAccessoryView;
+@property (nonatomic)  XLFormRowNavigationAccessoryView * rowNavigationAccessoryView;
 
 @end
 
 @implementation XLFormViewController
 
-@synthesize navigationBetweenFieldsAccessoryView = _navigationBetweenFieldsAccessoryView;
+@synthesize rowNavigationAccessoryView = _rowNavigationAccessoryView;
 
 #pragma mark - Properties
 
--(XLFormNavigationBetweenFieldsAccessoryView *)navigationBetweenFieldsAccessoryView
+-(XLFormRowNavigationAccessoryView *)rowNavigationAccessoryView
 {
-    if (_navigationBetweenFieldsAccessoryView) return _navigationBetweenFieldsAccessoryView;
+    if (_rowNavigationAccessoryView) return _rowNavigationAccessoryView;
     
-    _navigationBetweenFieldsAccessoryView = [XLFormNavigationBetweenFieldsAccessoryView new];
+    _rowNavigationAccessoryView = [XLFormRowNavigationAccessoryView new];
     
-    _navigationBetweenFieldsAccessoryView.previousButton.target = self;
-    _navigationBetweenFieldsAccessoryView.previousButton.action = @selector(navigationBetweenFieldsAction:);
+    _rowNavigationAccessoryView.previousButton.target = self;
+    _rowNavigationAccessoryView.previousButton.action = @selector(rowNavigationAction:);
     
-    _navigationBetweenFieldsAccessoryView.nextButton.target = self;
-    _navigationBetweenFieldsAccessoryView.nextButton.action = @selector(navigationBetweenFieldsAction:);
+    _rowNavigationAccessoryView.nextButton.target = self;
+    _rowNavigationAccessoryView.nextButton.action = @selector(rowNavigationAction:);
     
-    _navigationBetweenFieldsAccessoryView.doneButton.target = self;
-    _navigationBetweenFieldsAccessoryView.doneButton.action = @selector(navigationBetweenFieldsDone:);
+    _rowNavigationAccessoryView.doneButton.target = self;
+    _rowNavigationAccessoryView.doneButton.action = @selector(rowNavigationDone:);
 
-    return _navigationBetweenFieldsAccessoryView;
+    return _rowNavigationAccessoryView;
 }
 
 #pragma mark - Initialization
@@ -633,84 +638,109 @@
 
 -(UIView *)inputAccessoryViewForRowDescriptor:(XLFormRowDescriptor *)rowDescriptor
 {
-    return self.navigationBetweenFieldsAccessoryView;
-}
-
-#pragma mark - XLFormNavigationBetweenFieldsDelegate
-
--(void)navigationBetweenFieldsAction:(UIBarButtonItem *)sender
-{
-    if (sender == self.navigationBetweenFieldsAccessoryView.nextButton){
-        [self navigateFirstResponderToDirection:XLFormNavigationBetweenFieldsDirectionNext];
-    } else {
-        [self navigateFirstResponderToDirection:XLFormNavigationBetweenFieldsDirectionPrevious];
+    NSAssert(rowDescriptor.disabled == NO, @"{0} must not be disabled!", rowDescriptor);
+    
+    if (self.form.rowNavigationSettings == XLFormRowNavigationNone){
+        return nil;
     }
+    
+    XLFormRowDescriptor * previousRow = [self nextRowDescriptorForRow:rowDescriptor direction:XLFormRowNavigationDirectionPrevious];
+    XLFormRowDescriptor * nextRow = [self nextRowDescriptorForRow:rowDescriptor direction:XLFormRowNavigationDirectionNext];
+    [self.rowNavigationAccessoryView.previousButton setEnabled:(previousRow)];
+    [self.rowNavigationAccessoryView.nextButton setEnabled:(nextRow)];
+    
+    return self.rowNavigationAccessoryView;
 }
 
--(void)navigationBetweenFieldsDone:(UIBarButtonItem *)sender
+-(void)rowNavigationAction:(UIBarButtonItem *)sender
+{
+    (sender == self.rowNavigationAccessoryView.nextButton) ? [self navigateToDirection:XLFormRowNavigationDirectionNext]:
+                                                                       [self navigateToDirection:XLFormRowNavigationDirectionPrevious];
+}
+
+-(void)rowNavigationDone:(UIBarButtonItem *)sender
 {
     [self.tableView endEditing:YES];
 }
 
 
--(void)navigateFirstResponderToDirection:(XLFormNavigationBetweenFieldsDirection)direction
+-(void)navigateToDirection:(XLFormRowNavigationDirection)direction
 {
-    // get the row descriptor from first responder
     UIView * firstResponder = [self.tableView findFirstResponder];
-    UITableViewCell<XLFormDescriptorCell> * cell = [firstResponder formDescriptorCell];
-    NSIndexPath * currentIndexPath = [self.tableView indexPathForCell:cell];
+    UITableViewCell<XLFormDescriptorCell> * currentCell = [firstResponder formDescriptorCell];
+    NSIndexPath * currentIndexPath = [self.tableView indexPathForCell:currentCell];
     XLFormRowDescriptor * currentRow = [self.form formRowAtIndex:currentIndexPath];
     
-    XLFormRowDescriptor * nextRow = [self nextRowDescriptorForRow:currentRow direction:direction withJump:YES];
-
+    XLFormRowDescriptor * nextRow = [self nextRowDescriptorForRow:currentRow direction:direction];
     if (!nextRow) {
         return;
     }
-    [self becomeFirstResponderCellForRow:nextRow];
-}
-
--(void)becomeFirstResponderCellForRow:(XLFormRowDescriptor *)row
-{
-    UITableViewCell<XLFormDescriptorCell> * cell = (UITableViewCell<XLFormDescriptorCell> *)[row cellForFormController:self];
+    
+    UITableViewCell<XLFormDescriptorCell> * cell = (UITableViewCell<XLFormDescriptorCell> *)[nextRow cellForFormController:self];
     if ([cell respondsToSelector:@selector(formDescriptorCellBecomeFirstResponder)]){
-        NSIndexPath * indexPath = [self.form indexPathOfFormRow:row];
+        NSIndexPath * indexPath = [self.form indexPathOfFormRow:nextRow];
+        [self.tableView beginUpdates];
         [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionNone animated:NO];
+        [self.tableView endUpdates];
+        
         [cell formDescriptorCellBecomeFirstResponder];
     }
 }
 
--(XLFormRowDescriptor *)nextRowDescriptorForRow:(XLFormRowDescriptor*)currentRow direction:(XLFormNavigationBetweenFieldsDirection)direction withJump:(BOOL)jump
+-(XLFormRowDescriptor *)nextRowDescriptorForRow:(XLFormRowDescriptor*)currentRow direction:(XLFormRowNavigationDirection)direction
 {
-    // Recursive Method
     if (!currentRow) {
         return nil;
     }
-    
-    XLFormRowDescriptor * nextRow = (direction == XLFormNavigationBetweenFieldsDirectionNext) ? [self.form nextRowDescriptorForRow:currentRow] :
-                                                                                                [self.form previousRowDescriptorForRow:currentRow];
-    if (!nextRow) { // has no next / previous
+    XLFormRowDescriptor * nextRow = (direction == XLFormRowNavigationDirectionNext) ? [self.form nextRowDescriptorForRow:currentRow] :
+                                                                                   [self.form previousRowDescriptorForRow:currentRow];
+    if (!nextRow) {
         return nil;
     }
     
-    if (nextRow.disabled) { // if disables => jump to next / previous
-        return [self nextRowDescriptorForRow:nextRow direction:direction withJump:jump];
+    XLFormNavigationType navigationType = [self getNavigationTypeForRow:nextRow];
+    
+    if (navigationType == XLFormNavigationTypeStop) {
+        return nil;
     }
-    else {
-        UITableViewCell<XLFormDescriptorCell> * previousCell = (UITableViewCell<XLFormDescriptorCell> *)[nextRow cellForFormController:self];
-        BOOL canBecomeFirstResponder = [previousCell respondsToSelector:@selector(formDescriptorCellBecomeFirstResponder)];
-        if (canBecomeFirstResponder){ // if can become first responder => this row is the next
-            return nextRow;
-        }
-        else {
-            if (jump) { // if can not become first responder and jump => jump to next / previous
-                return [self nextRowDescriptorForRow:nextRow direction:direction withJump:jump];
-            }
-            else { // if can not become first responder and not jump => has no next / previous
-                return nil;
-            }
-        }
+    else if (navigationType == XLFormNavigationTypeStay) {
+        return nextRow;
+    }
+    else  { //XLFormNavigationTypeSkip
+        return [self nextRowDescriptorForRow:nextRow direction:direction];
     }
 }
 
+-(XLFormNavigationType)getNavigationTypeForRow:(XLFormRowDescriptor *)row
+{
+    XLFormRowNavigationSettings rowNavigationSettings = self.form.rowNavigationSettings;
+    
+    if (rowNavigationSettings == XLFormRowNavigationNone){
+        return XLFormNavigationTypeStop;
+    }
+    if (((rowNavigationSettings & XLFormRowNavigationDisableWhenReachDisableRow) == XLFormRowNavigationDisableWhenReachDisableRow) && (row.disabled)){
+        return XLFormNavigationTypeStop;
+    }
+    if (((rowNavigationSettings & XLFormRowNavigationDisableWhenReachCanNotBecomeFirstResponderRow) == XLFormRowNavigationDisableWhenReachCanNotBecomeFirstResponderRow) && (![self rowCanBecomeFirstResponder:row])){
+        return XLFormNavigationTypeStop;
+    }
+    if (((rowNavigationSettings & XLFormRowNavigationDisableWhenReachInlineRow) == XLFormRowNavigationDisableWhenReachInlineRow) && [[[XLFormViewController inlineRowDescriptorTypesForRowDescriptorTypes] allKeys] containsObject:row.rowType])
+    {
+        return XLFormNavigationTypeStop;
+    }
+    
+    if (!row.disabled && [self rowCanBecomeFirstResponder:row]){ // if can become first responder => this row is the next
+        return XLFormNavigationTypeStay;
+    }
 
+    return XLFormNavigationTypeSkip;
+}
+
+-(BOOL)rowCanBecomeFirstResponder:(XLFormRowDescriptor *)row
+{
+    UITableViewCell<XLFormDescriptorCell> * nextCell = (UITableViewCell<XLFormDescriptorCell> *)[row cellForFormController:self];
+    BOOL canBecomeFirstResponder = [nextCell respondsToSelector:@selector(formDescriptorCellBecomeFirstResponder)];
+    return canBecomeFirstResponder;
+}
+    
 @end

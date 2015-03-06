@@ -75,11 +75,12 @@
 
 -(UIView *)inputAccessoryView
 {
-    XLFormDescriptor * formDescriptor = self.formViewController.form;
-    if (formDescriptor.supportNavigationBetweenFields){
-        return [self.formViewController inputAccessoryViewForRowDescriptor:self.rowDescriptor];
+    UIView * inputAccessoryView = [self.formViewController inputAccessoryViewForRowDescriptor:self.rowDescriptor];
+    if (inputAccessoryView){
+        return inputAccessoryView;
     }
     return [super inputAccessoryView];
 }
+
 
 @end

@@ -51,8 +51,7 @@ NSString * const XLValidationStatusErrorKey = @"XLValidationStatusErrorKey";
         _formSections = [NSMutableArray array];
         _title = title;
         _addAsteriskToRequiredRowsTitle = NO;
-#warning change _supportNavigationBetweenFields to NO
-        _supportNavigationBetweenFields = YES;
+        _rowNavigationSettings = XLFormRowNavigationNone;
         
         [self addObserver:self forKeyPath:@"formSections" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:0];
     }

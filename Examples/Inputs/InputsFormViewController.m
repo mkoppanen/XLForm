@@ -49,7 +49,6 @@ NSString *const kNotes = @"notes";
     XLFormRowDescriptor * row;
     
     formDescriptor.assignFirstResponderOnShow = YES;
-    formDescriptor.supportNavigationBetweenFields = YES;
     
     // Basic Information - Section
     section = [XLFormSectionDescriptor formSectionWithTitle:@"TextField Types"];
