@@ -35,16 +35,15 @@
 @synthesize pickerView = _pickerView;
 @synthesize inlineRowDescriptor = _inlineRowDescriptor;
 
-#warning this comment should be here?
-//-(BOOL)canResignFirstResponder
-//{
-//    return YES;
-//}
-//
-//-(BOOL)canBecomeFirstResponder
-//{
-//    return (self.inlineRowDescriptor == nil);
-//}
+-(BOOL)canResignFirstResponder
+{
+    return YES;
+}
+
+-(BOOL)canBecomeFirstResponder
+{
+    return (self.inlineRowDescriptor == nil);
+}
 
 #pragma mark - Properties
 

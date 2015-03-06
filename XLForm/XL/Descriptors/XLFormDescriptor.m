@@ -398,11 +398,10 @@ NSString * const XLValidationStatusErrorKey = @"XLValidationStatusErrorKey";
 
 -(XLFormRowDescriptor *)nextRowDescriptorForRow:(XLFormRowDescriptor *)currentRow
 {
+    NSAssert(currentRow, @"current row must not be nil");
     XLFormRowDescriptor * nextRow = nil;
-    NSMutableArray * allRows = [NSMutableArray new];
-    for (XLFormSectionDescriptor * section in self.formSections){
-        [allRows addObjectsFromArray:section.formRows];
-    }
+    
+    NSArray * allRows = [self getRowsList];
     
     NSInteger currentIndex = [allRows indexOfObject:currentRow];
     if (currentIndex != NSNotFound){
@@ -417,11 +416,10 @@ NSString * const XLValidationStatusErrorKey = @"XLValidationStatusErrorKey";
 
 -(XLFormRowDescriptor *)previousRowDescriptorForRow:(XLFormRowDescriptor *)currentRow
 {
+    NSAssert(currentRow, @"current row must not be nil");
     XLFormRowDescriptor * previousRow = nil;
-    NSMutableArray * allRows = [NSMutableArray new];
-    for (XLFormSectionDescriptor * section in self.formSections){
-        [allRows addObjectsFromArray:section.formRows];
-    }
+   
+    NSArray * allRows = [self getRowsList];
     
     NSInteger currentIndex = [allRows indexOfObject:currentRow];
     if (currentIndex != NSNotFound){
@@ -431,6 +429,17 @@ NSString * const XLValidationStatusErrorKey = @"XLValidationStatusErrorKey";
         }
     }
     return previousRow;
+}
+
+-(NSArray *)getRowsList
+{
+    NSMutableArray * allRows = [NSMutableArray new];
+    for (XLFormSectionDescriptor * section in self.formSections){
+        if ([section.formRows count] > 0){
+            [allRows addObjectsFromArray:section.formRows];
+        }
+    }
+    return allRows;
 }
 
 @end

@@ -655,12 +655,13 @@
 
 -(void)navigateFirstResponderToDirection:(XLFormNavigationBetweenFieldsDirection)direction
 {
+    // get the row descriptor from first responder
     UIView * firstResponder = [self.tableView findFirstResponder];
     UITableViewCell<XLFormDescriptorCell> * cell = [firstResponder formDescriptorCell];
     NSIndexPath * currentIndexPath = [self.tableView indexPathForCell:cell];
     XLFormRowDescriptor * currentRow = [self.form formRowAtIndex:currentIndexPath];
     
-    XLFormRowDescriptor * nextRow = (direction == XLFormNavigationBetweenFieldsDirectionNext) ? [self.form nextRowDescriptorForRow:currentRow] : [self.form previousRowDescriptorForRow:currentRow];
+    XLFormRowDescriptor * nextRow = [self nextRowDescriptorForRow:currentRow direction:direction withJump:YES];
 
     if (!nextRow) {
         return;
@@ -675,6 +676,39 @@
         NSIndexPath * indexPath = [self.form indexPathOfFormRow:row];
         [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionNone animated:NO];
         [cell formDescriptorCellBecomeFirstResponder];
+    }
+}
+
+-(XLFormRowDescriptor *)nextRowDescriptorForRow:(XLFormRowDescriptor*)currentRow direction:(XLFormNavigationBetweenFieldsDirection)direction withJump:(BOOL)jump
+{
+    // Recursive Method
+    if (!currentRow) {
+        return nil;
+    }
+    
+    XLFormRowDescriptor * nextRow = (direction == XLFormNavigationBetweenFieldsDirectionNext) ? [self.form nextRowDescriptorForRow:currentRow] :
+                                                                                                [self.form previousRowDescriptorForRow:currentRow];
+    if (!nextRow) { // has no next / previous
+        return nil;
+    }
+    
+    if (nextRow.disabled) { // if disables => jump to next / previous
+        return [self nextRowDescriptorForRow:nextRow direction:direction withJump:jump];
+    }
+    else {
+        UITableViewCell<XLFormDescriptorCell> * previousCell = (UITableViewCell<XLFormDescriptorCell> *)[nextRow cellForFormController:self];
+        BOOL canBecomeFirstResponder = [previousCell respondsToSelector:@selector(formDescriptorCellBecomeFirstResponder)];
+        if (canBecomeFirstResponder){ // if can become first responder => this row is the next
+            return nextRow;
+        }
+        else {
+            if (jump) { // if can not become first responder and jump => jump to next / previous
+                return [self nextRowDescriptorForRow:nextRow direction:direction withJump:jump];
+            }
+            else { // if can not become first responder and not jump => has no next / previous
+                return nil;
+            }
+        }
     }
 }
 
