@@ -112,7 +112,7 @@
     [separatorView setBackgroundColor:[UIColor colorWithWhite:0.85 alpha:1.0]];
     _constraintTextField = [UITextField autolayoutView];
     [_constraintTextField setText:@"Option"];
-    [_constraintTextField setFont:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]];
+    [_constraintTextField setFont:self.subheadlineFont];
     [self.contentView addSubview:_constraintTextField];
     [_constraintTextField setHidden:YES];
     [self.contentView addSubview:self.leftButton];
@@ -137,9 +137,9 @@
     [self.leftButton setEnabled:(!self.rowDescriptor.disabled)];
     self.accessoryView = self.rowDescriptor.disabled ? nil : [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"XLForm.bundle/forwardarrow.png"]];
     self.selectionStyle = self.rowDescriptor.disabled ? UITableViewCellSelectionStyleNone : UITableViewCellSelectionStyleDefault;    
-    self.leftButton.titleLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
-    self.rightLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
-    _constraintTextField.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
+    self.leftButton.titleLabel.font = self.leftButtonFont;
+    self.rightLabel.font = self.rightLabelFont;
+    _constraintTextField.font = self.textLabelFont;
 }
 
 

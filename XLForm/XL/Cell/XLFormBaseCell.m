@@ -36,6 +36,15 @@
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
     if (self) {
+        self.textLabelFont       = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
+        self.detailTextLabelFont = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
+        self.subheadlineFont     = [UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline];
+        self.leftButtonFont      = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
+        self.rightLabelFont      = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
+        self.stepValueFont       = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
+        self.textFieldFont       = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
+        self.textViewFont        = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
+
         [self configure];
     }
     return self;
