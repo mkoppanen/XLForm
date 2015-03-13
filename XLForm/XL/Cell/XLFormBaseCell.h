@@ -35,6 +35,23 @@
 
 @property (nonatomic, weak) XLFormRowDescriptor * rowDescriptor;
 
+// Apperance proxies
+@property (nonatomic, assign) UIFont *textLabelFont UI_APPEARANCE_SELECTOR;
+
+@property (nonatomic, assign) UIFont *detailTextLabelFont UI_APPEARANCE_SELECTOR;
+
+@property (nonatomic, assign) UIFont *subheadlineFont UI_APPEARANCE_SELECTOR;
+
+@property (nonatomic, assign) UIFont *leftButtonFont UI_APPEARANCE_SELECTOR;
+
+@property (nonatomic, assign) UIFont *rightLabelFont UI_APPEARANCE_SELECTOR;
+
+@property (nonatomic, assign) UIFont *stepValueFont UI_APPEARANCE_SELECTOR;
+
+@property (nonatomic, assign) UIFont *textFieldFont UI_APPEARANCE_SELECTOR;
+
+@property (nonatomic, assign) UIFont *textViewFont UI_APPEARANCE_SELECTOR;
+
 -(XLFormViewController *)formViewController;
 
 @end
