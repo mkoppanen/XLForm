@@ -33,10 +33,15 @@
 @interface XLFormViewController()
 
 @property UITableViewStyle tableViewStyle;
+@property (nonatomic) XLFormRowNavigationAccessoryView * navigationAccessoryView;
 
 @end
 
 @implementation XLFormViewController
+
+@synthesize form = _form;
+
+#pragma mark - Initialization
 
 -(id)initWithForm:(XLFormDescriptor *)form
 {
@@ -92,7 +97,7 @@
         self.tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     }
     if (!self.tableView.superview){
-        [self.view addSubview:self.tableView];;
+        [self.view addSubview:self.tableView];
     }
     if (!self.tableView.delegate){
         self.tableView.delegate = self;
@@ -188,7 +193,7 @@
                                                XLFormRowDescriptorTypeInteger: [XLFormTextFieldCell class],
                                                XLFormRowDescriptorTypeDecimal: [XLFormTextFieldCell class],
                                                XLFormRowDescriptorTypeSelectorPush: [XLFormSelectorCell class],
-											   XLFormRowDescriptorTypeSelectorPopover: [XLFormSelectorCell class],
+                                               XLFormRowDescriptorTypeSelectorPopover: [XLFormSelectorCell class],
                                                XLFormRowDescriptorTypeSelectorActionSheet: [XLFormSelectorCell class],
                                                XLFormRowDescriptorTypeSelectorAlertView: [XLFormSelectorCell class],
                                                XLFormRowDescriptorTypeSelectorPickerView: [XLFormSelectorCell class],
@@ -209,7 +214,7 @@
                                                XLFormRowDescriptorTypeDateTimeInline: [XLFormDateCell class],
                                                XLFormRowDescriptorTypeDatePicker : [XLFormDatePickerCell class],
                                                XLFormRowDescriptorTypePicker : [XLFormPickerCell class],
-											   XLFormRowDescriptorTypeSlider : [XLFormSliderCell class],
+                                               XLFormRowDescriptorTypeSlider : [XLFormSliderCell class],
                                                XLFormRowDescriptorTypeSelectorLeftRight : [XLFormLeftRightSelectorCell class],
                                                XLFormRowDescriptorTypeStepCounter: [XLFormStepCounterCell class]
                                                } mutableCopy];
@@ -226,14 +231,13 @@
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         _inlineRowDescriptorTypesForRowDescriptorTypes = [
-  @{XLFormRowDescriptorTypeSelectorPickerViewInline: XLFormRowDescriptorTypePicker,
-    XLFormRowDescriptorTypeDateInline: XLFormRowDescriptorTypeDatePicker,
-    XLFormRowDescriptorTypeDateTimeInline: XLFormRowDescriptorTypeDatePicker,
-    XLFormRowDescriptorTypeTimeInline: XLFormRowDescriptorTypeDatePicker
+                                                          @{XLFormRowDescriptorTypeSelectorPickerViewInline: XLFormRowDescriptorTypePicker,
+                                                            XLFormRowDescriptorTypeDateInline: XLFormRowDescriptorTypeDatePicker,
+                                                            XLFormRowDescriptorTypeDateTimeInline: XLFormRowDescriptorTypeDatePicker,
+                                                            XLFormRowDescriptorTypeTimeInline: XLFormRowDescriptorTypeDatePicker
                                                             } mutableCopy];
     });
     return _inlineRowDescriptorTypesForRowDescriptorTypes;
-
 }
 
 #pragma mark - XLFormDescriptorDelegate
@@ -305,6 +309,34 @@
     return UITableViewRowAnimationAutomatic;
 }
 
+-(UIView *)inputAccessoryViewForRowDescriptor:(XLFormRowDescriptor *)rowDescriptor
+{
+    if ((self.form.rowNavigationOptions & XLFormRowNavigationOptionEnabled) != XLFormRowNavigationOptionEnabled){
+        return nil;
+    }
+    UITableViewCell<XLFormDescriptorCell> * cell = (UITableViewCell<XLFormDescriptorCell> *)[rowDescriptor cellForFormController:self];
+    if (![cell formDescriptorCellCanBecomeFirstResponder]){
+        return nil;
+    }
+    XLFormRowDescriptor * previousRow = [self nextRowDescriptorForRow:rowDescriptor
+                                                            withDirection:XLFormRowNavigationDirectionPrevious];
+    XLFormRowDescriptor * nextRow     = [self nextRowDescriptorForRow:rowDescriptor
+                                                            withDirection:XLFormRowNavigationDirectionNext];
+    [self.navigationAccessoryView.previousButton setEnabled:(previousRow != nil)];
+    [self.navigationAccessoryView.nextButton setEnabled:(nextRow != nil)];
+    return self.navigationAccessoryView;
+}
+
+-(void)beginEditing:(XLFormRowDescriptor *)rowDescriptor
+{
+    [[rowDescriptor cellForFormController:self] highlight];
+}
+
+-(void)endEditing:(XLFormRowDescriptor *)rowDescriptor
+{
+    [[rowDescriptor cellForFormController:self] unhighlight];
+}
+
 #pragma mark - Methods
 
 -(NSArray *)formValidationErrors
@@ -327,7 +359,6 @@
         [responder performSelector:selector withObject:sender];
 #pragma GCC diagnostic pop
     }
-
 }
 
 #pragma mark - Private
@@ -399,20 +430,6 @@
     }
 }
 
--(NSIndexPath *)nextIndexPath:(NSIndexPath *)indexPath
-{
-    if ([self.tableView numberOfRowsInSection:indexPath.section] > (indexPath.row + 1)){
-        return [NSIndexPath indexPathForRow:(indexPath.row + 1) inSection:indexPath.section];
-    }
-    else if ([self.tableView numberOfSections] > (indexPath.section + 1)){
-        if ([self.tableView numberOfRowsInSection:(indexPath.section + 1)] > 0){
-            return [NSIndexPath indexPathForRow:0 inSection:(indexPath.section + 1)];
-        }
-    }
-    return nil;
-}
-
-
 #pragma mark - UITableViewDataSource
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
@@ -465,8 +482,10 @@
         self.tableView.editing = NO;
         self.tableView.editing = YES;
         [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:indexPath.row + 1 inSection:indexPath.section] atScrollPosition:UITableViewScrollPositionBottom animated:YES];
-        if ([[formRowDescriptor cellForFormController:self] respondsToSelector:@selector(formDescriptorCellBecomeFirstResponder)]){
-            [[formRowDescriptor cellForFormController:self] formDescriptorCellBecomeFirstResponder];
+        
+        UITableViewCell<XLFormDescriptorCell> * cell = (UITableViewCell<XLFormDescriptorCell> *)[formRowDescriptor cellForFormController:self];
+        if ([cell formDescriptorCellCanBecomeFirstResponder]){
+            [cell formDescriptorCellBecomeFirstResponder];
         }
     }
 }
@@ -512,7 +531,8 @@
     if (row.disabled) {
         return;
     }
-    else if (!([[row cellForFormController:self] respondsToSelector:@selector(formDescriptorCellBecomeFirstResponder)] && [[row cellForFormController:self] formDescriptorCellBecomeFirstResponder])){
+    UITableViewCell<XLFormDescriptorCell> * cell = (UITableViewCell<XLFormDescriptorCell> *)[row cellForFormController:self];
+    if (!([cell formDescriptorCellCanBecomeFirstResponder] && [cell formDescriptorCellBecomeFirstResponder])){
         [self.tableView endEditing:YES];
     }
     [self didSelectFormRow:row];
@@ -526,7 +546,6 @@
     return UITableViewCellEditingStyleDelete;
 }
 
-
 #pragma mark - UITextFieldDelegate
 
 
@@ -539,25 +558,25 @@
 {
     // called when 'return' key pressed. return NO to ignore.
     UITableViewCell<XLFormDescriptorCell> * cell = [textField formDescriptorCell];
-    NSIndexPath * currentIndexPath = [self.tableView indexPathForCell:cell];
-    NSIndexPath * nextIndexPath = [self nextIndexPath:currentIndexPath];
-    
-    if (nextIndexPath){
-        XLFormRowDescriptor * nextFormRow = [self.form formRowAtIndex:nextIndexPath];
-        UITableViewCell<XLFormDescriptorCell> * nextCell = (UITableViewCell<XLFormDescriptorCell> *)[nextFormRow cellForFormController:self];
-        if ([nextCell respondsToSelector:@selector(formDescriptorCellBecomeFirstResponder)]){
+    XLFormRowDescriptor * currentRow = cell.rowDescriptor;
+    XLFormRowDescriptor * nextRow = [self nextRowDescriptorForRow:currentRow
+                                                    withDirection:XLFormRowNavigationDirectionNext];
+    if (nextRow){
+        UITableViewCell<XLFormDescriptorCell> * nextCell = (UITableViewCell<XLFormDescriptorCell> *)[nextRow cellForFormController:self];
+        if ([nextCell formDescriptorCellCanBecomeFirstResponder]){
             [nextCell formDescriptorCellBecomeFirstResponder];
             return YES;
         }
     }
-    if ([cell respondsToSelector:@selector(formDescriptorCellResignFirstResponder)]){
-        [cell formDescriptorCellResignFirstResponder];
-    }
+    [self.tableView endEditing:YES];
     return YES;
 }
 
 - (BOOL)textFieldShouldBeginEditing:(UITextField *)textField
 {
+    XLFormRowDescriptor * nextRow     = [self nextRowDescriptorForRow:textField.formDescriptorCell.rowDescriptor
+                                                        withDirection:XLFormRowNavigationDirectionNext];
+    textField.returnKeyType = nextRow ? UIReturnKeyNext : UIReturnKeyDefault;
     return YES;
 }
 
@@ -579,6 +598,15 @@
 }
 
 #pragma mark - UITextViewDelegate
+
+- (BOOL)textViewShouldBeginEditing:(UITextView *)textView
+{
+    return YES;
+}
+
+-(void)textViewDidBeginEditing:(UITextView *)textView
+{
+}
 
 -(void)textViewDidEndEditing:(UITextView *)textView
 {
@@ -617,6 +645,98 @@
             rowDescriptorViewController.rowDescriptor = rowDescriptor;
         }
     }
+}
+
+#pragma mark - Navigation Between Fields
+
+
+-(void)rowNavigationAction:(UIBarButtonItem *)sender
+{
+    [self navigateToDirection:(sender == self.navigationAccessoryView.nextButton ? XLFormRowNavigationDirectionNext : XLFormRowNavigationDirectionPrevious)];
+}
+
+-(void)rowNavigationDone:(UIBarButtonItem *)sender
+{
+    [self.tableView endEditing:YES];
+}
+
+-(void)navigateToDirection:(XLFormRowNavigationDirection)direction
+{
+    UIView * firstResponder = [self.tableView findFirstResponder];
+    UITableViewCell<XLFormDescriptorCell> * currentCell = [firstResponder formDescriptorCell];
+    NSIndexPath * currentIndexPath = [self.tableView indexPathForCell:currentCell];
+    XLFormRowDescriptor * currentRow = [self.form formRowAtIndex:currentIndexPath];
+    XLFormRowDescriptor * nextRow = [self nextRowDescriptorForRow:currentRow withDirection:direction];
+    if (nextRow) {
+        UITableViewCell<XLFormDescriptorCell> * cell = (UITableViewCell<XLFormDescriptorCell> *)[nextRow cellForFormController:self];
+        if ([cell formDescriptorCellCanBecomeFirstResponder]){
+            NSIndexPath * indexPath = [self.form indexPathOfFormRow:nextRow];
+            [self.tableView beginUpdates];
+            [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionNone animated:NO];
+            [self.tableView endUpdates];
+            
+            [cell formDescriptorCellBecomeFirstResponder];
+        }
+    }
+}
+
+-(XLFormRowDescriptor *)nextRowDescriptorForRow:(XLFormRowDescriptor*)currentRow withDirection:(XLFormRowNavigationDirection)direction
+{
+    if (!currentRow || (self.form.rowNavigationOptions & XLFormRowNavigationOptionEnabled) != XLFormRowNavigationOptionEnabled) {
+        return nil;
+    }
+    XLFormRowDescriptor * nextRow = (direction == XLFormRowNavigationDirectionNext) ? [self.form nextRowDescriptorForRow:currentRow] : [self.form previousRowDescriptorForRow:currentRow];
+    if (!nextRow) {
+        return nil;
+    }
+    if ([[nextRow cellForFormController:self] conformsToProtocol:@protocol(XLFormInlineRowDescriptorCell)]) {
+        id<XLFormInlineRowDescriptorCell> inlineCell = (id<XLFormInlineRowDescriptorCell>)[nextRow cellForFormController:self];
+        if (inlineCell.inlineRowDescriptor){
+            return [self nextRowDescriptorForRow:nextRow withDirection:direction];
+        }
+    }
+    XLFormRowNavigationOptions rowNavigationOptions = self.form.rowNavigationOptions;
+    if (nextRow.disabled && ((rowNavigationOptions & XLFormRowNavigationOptionStopDisableRow) == XLFormRowNavigationOptionStopDisableRow)){
+        return nil;
+    }
+    if (!nextRow.disabled && ((rowNavigationOptions & XLFormRowNavigationOptionStopInlineRow) == XLFormRowNavigationOptionStopInlineRow) && [[[XLFormViewController inlineRowDescriptorTypesForRowDescriptorTypes] allKeys] containsObject:nextRow.rowType]){
+        return nil;
+    }
+    UITableViewCell<XLFormDescriptorCell> * cell = (UITableViewCell<XLFormDescriptorCell> *)[nextRow cellForFormController:self];
+    if (!nextRow.disabled && ((rowNavigationOptions & XLFormRowNavigationOptionSkipCanNotBecomeFirstResponderRow) != XLFormRowNavigationOptionSkipCanNotBecomeFirstResponderRow) && (![cell formDescriptorCellCanBecomeFirstResponder])){
+        return nil;
+    }
+    if (!nextRow.disabled && [cell formDescriptorCellCanBecomeFirstResponder]){
+        return nextRow;
+    }
+    return [self nextRowDescriptorForRow:nextRow withDirection:direction];
+}
+
+#pragma mark - properties
+
+-(void)setForm:(XLFormDescriptor *)form
+{
+    _form = form;
+    _form.delegate = self;
+}
+
+-(XLFormDescriptor *)form
+{
+    return _form;
+}
+
+-(XLFormRowNavigationAccessoryView *)navigationAccessoryView
+{
+    if (_navigationAccessoryView) return _navigationAccessoryView;
+    _navigationAccessoryView = [XLFormRowNavigationAccessoryView new];
+    _navigationAccessoryView.previousButton.target = self;
+    _navigationAccessoryView.previousButton.action = @selector(rowNavigationAction:);
+    _navigationAccessoryView.nextButton.target = self;
+    _navigationAccessoryView.nextButton.action = @selector(rowNavigationAction:);
+    _navigationAccessoryView.doneButton.target = self;
+    _navigationAccessoryView.doneButton.action = @selector(rowNavigationDone:);
+    _navigationAccessoryView.tintColor = self.view.tintColor;
+    return _navigationAccessoryView;
 }
 
 @end

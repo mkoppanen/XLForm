@@ -55,12 +55,39 @@
 
 - (BOOL)canBecomeFirstResponder
 {
-    return YES;
+    return (!self.rowDescriptor.disabled);
+}
+
+-(BOOL)becomeFirstResponder
+{
+    _beforeChangeColor = self.detailTextLabel.textColor;
+    BOOL result = [super becomeFirstResponder];
+    if (result){
+        if ([self.rowDescriptor.rowType isEqualToString:XLFormRowDescriptorTypeDateInline] || [self.rowDescriptor.rowType isEqualToString:XLFormRowDescriptorTypeTimeInline] || [self.rowDescriptor.rowType isEqualToString:XLFormRowDescriptorTypeDateTimeInline])
+        {
+            NSIndexPath * selectedRowPath = [self.formViewController.form indexPathOfFormRow:self.rowDescriptor];
+            NSIndexPath * nextRowPath = [NSIndexPath indexPathForRow:(selectedRowPath.row + 1) inSection:selectedRowPath.section];
+            XLFormSectionDescriptor * formSection = [self.formViewController.form.formSections objectAtIndex:nextRowPath.section];
+            XLFormRowDescriptor * datePickerRowDescriptor = [XLFormRowDescriptor formRowDescriptorWithTag:nil rowType:XLFormRowDescriptorTypeDatePicker];
+            XLFormDatePickerCell * datePickerCell = (XLFormDatePickerCell *)[datePickerRowDescriptor cellForFormController:self.formViewController];
+            [self setModeToDatePicker:datePickerCell.datePicker];
+            if (self.rowDescriptor.value){
+                [datePickerCell.datePicker setDate:self.rowDescriptor.value];
+            }
+            [datePickerCell.datePicker addTarget:self action:@selector(datePickerValueChanged:) forControlEvents:UIControlEventValueChanged];
+            
+            NSAssert([datePickerCell conformsToProtocol:@protocol(XLFormInlineRowDescriptorCell)], @"inline cell must conform to XLFormInlineRowDescriptorCell");
+            UITableViewCell<XLFormInlineRowDescriptorCell> * inlineCell = (UITableViewCell<XLFormInlineRowDescriptorCell> *)datePickerCell;
+            inlineCell.inlineRowDescriptor = self.rowDescriptor;
+            
+            [formSection addFormRow:datePickerRowDescriptor afterRow:self.rowDescriptor];
+        }
+    }
+    return result;
 }
 
 -(BOOL)resignFirstResponder
 {
-    self.detailTextLabel.textColor = _beforeChangeColor;
     if ([self.rowDescriptor.rowType isEqualToString:XLFormRowDescriptorTypeDateInline] || [self.rowDescriptor.rowType isEqualToString:XLFormRowDescriptorTypeTimeInline] || [self.rowDescriptor.rowType isEqualToString:XLFormRowDescriptorTypeDateTimeInline])
     {
         NSIndexPath * selectedRowPath = [self.formViewController.form indexPathOfFormRow:self.rowDescriptor];
@@ -100,40 +127,35 @@
 
 -(void)formDescriptorCellDidSelectedWithFormController:(XLFormViewController *)controller
 {
-    if ([self.rowDescriptor.rowType isEqualToString:XLFormRowDescriptorTypeDateInline] || [self.rowDescriptor.rowType isEqualToString:XLFormRowDescriptorTypeTimeInline] || [self.rowDescriptor.rowType isEqualToString:XLFormRowDescriptorTypeDateTimeInline])
-    {
-        if ([self isFirstResponder]){
-            [self resignFirstResponder];
-        }
-        else{
-            [self becomeFirstResponder];
-            _beforeChangeColor = self.detailTextLabel.textColor;
-            self.detailTextLabel.textColor = self.formViewController.view.tintColor;
-            NSIndexPath * selectedRowPath = [controller.form indexPathOfFormRow:self.rowDescriptor];
-            NSIndexPath * nextRowPath = [NSIndexPath indexPathForRow:(selectedRowPath.row + 1) inSection:selectedRowPath.section];
-            XLFormSectionDescriptor * formSection = [controller.form.formSections objectAtIndex:nextRowPath.section];
-            XLFormRowDescriptor * datePickerRowDescriptor = [XLFormRowDescriptor formRowDescriptorWithTag:nil rowType:XLFormRowDescriptorTypeDatePicker];
-            XLFormDatePickerCell * datePickerCell = (XLFormDatePickerCell *)[datePickerRowDescriptor cellForFormController:controller];
-            [self setModeToDatePicker:datePickerCell.datePicker];
-            if (self.rowDescriptor.value){
-                [datePickerCell.datePicker setDate:self.rowDescriptor.value];
-            }
-            [datePickerCell.datePicker addTarget:self action:@selector(datePickerValueChanged:) forControlEvents:UIControlEventValueChanged];
-            [formSection addFormRow:datePickerRowDescriptor afterRow:self.rowDescriptor];
-        }
-        [controller.tableView deselectRowAtIndexPath:[controller.form indexPathOfFormRow:self.rowDescriptor] animated:YES];
-    }
-    else if ([self.rowDescriptor.rowType isEqualToString:XLFormRowDescriptorTypeDate] || [self.rowDescriptor.rowType isEqualToString:XLFormRowDescriptorTypeTime] || [self.rowDescriptor.rowType isEqualToString:XLFormRowDescriptorTypeDateTime])
-    {
-        [self becomeFirstResponder];
-        [controller.tableView selectRowAtIndexPath:nil animated:YES scrollPosition:UITableViewScrollPositionNone];
-    }
+    [self.formViewController.tableView deselectRowAtIndexPath:[controller.form indexPathOfFormRow:self.rowDescriptor] animated:YES];
+}
+
+-(BOOL)formDescriptorCellCanBecomeFirstResponder
+{
+    return [self canBecomeFirstResponder];
 }
 
 -(BOOL)formDescriptorCellBecomeFirstResponder
 {
-    return YES;
+    if ([self isFirstResponder]){
+        return [self resignFirstResponder];
+    }
+    return [self becomeFirstResponder];
+
 }
+
+-(void)highlight
+{
+    [super highlight];
+    self.detailTextLabel.textColor = self.formViewController.view.tintColor;
+}
+
+-(void)unhighlight
+{
+    [super unhighlight];
+    self.detailTextLabel.textColor = _beforeChangeColor;
+}
+
 
 #pragma mark - helpers
 

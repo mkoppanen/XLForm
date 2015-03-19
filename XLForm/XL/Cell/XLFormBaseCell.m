@@ -41,13 +41,10 @@
     return self;
 }
 
-- (instancetype)initWithCoder:(NSCoder *)coder
+- (void)awakeFromNib
 {
-    self = [super initWithCoder:coder];
-    if (self) {
-        [self configure];
-    }
-    return self;
+    [super awakeFromNib];
+    [self configure];
 }
 
 -(void)setRowDescriptor:(XLFormRowDescriptor *)rowDescriptor
@@ -67,6 +64,14 @@
     // override
 }
 
+-(void)highlight
+{
+}
+
+-(void)unhighlight
+{
+}
+
 -(XLFormViewController *)formViewController
 {
     id responder = self;
@@ -79,5 +84,64 @@
     return nil;
 }
 
+#pragma mark - Navigation Between Fields
+
+-(UIView *)inputAccessoryView
+{
+    UIView * inputAccessoryView = [self.formViewController inputAccessoryViewForRowDescriptor:self.rowDescriptor];
+    if (inputAccessoryView){
+        return inputAccessoryView;
+    }
+    return [super inputAccessoryView];
+}
+
+-(BOOL)formDescriptorCellCanBecomeFirstResponder
+{
+    return NO;
+}
+
+#pragma mark -
+
+-(BOOL)becomeFirstResponder
+{
+    BOOL result = [super becomeFirstResponder];
+    if (result){
+        [self.formViewController beginEditing:self.rowDescriptor];
+    }
+    return result;
+}
+
+-(BOOL)resignFirstResponder
+{
+    BOOL result = [super resignFirstResponder];
+    if (result){
+        [self.formViewController endEditing:self.rowDescriptor];
+    }
+    return result;
+}
+
+#pragma mark -
+
+-(void)setAccessoryType:(UITableViewCellAccessoryType)accessoryType
+{
+    [super setAccessoryType:accessoryType];
+    [super setEditingAccessoryType:accessoryType];
+}
+
+-(void)setAccessoryView:(UIView *)accessoryView
+{
+    [super setAccessoryView:accessoryView];
+    [super setEditingAccessoryView:accessoryView];
+}
+
+-(void)setEditingAccessoryType:(UITableViewCellAccessoryType)editingAccessoryType
+{
+    [self setAccessoryType:editingAccessoryType];
+}
+
+-(void)setEditingAccessoryView:(UIView *)editingAccessoryView
+{
+    [self setAccessoryView:editingAccessoryView];
+}
 
 @end

@@ -98,6 +98,7 @@
             cell.accessoryType = UITableViewCellAccessoryNone;
         }
     }
+    cell.textLabel.font = [self.rowDescriptor.sectionDescriptor.formDescriptor regularFont];
     return cell;
 }
 

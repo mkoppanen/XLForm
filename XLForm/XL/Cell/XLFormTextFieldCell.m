@@ -141,14 +141,26 @@
     
 }
 
+-(BOOL)formDescriptorCellCanBecomeFirstResponder
+{
+    return (!self.rowDescriptor.disabled);
+}
+
 -(BOOL)formDescriptorCellBecomeFirstResponder
 {
     return [self.textField becomeFirstResponder];
 }
 
--(BOOL)formDescriptorCellResignFirstResponder
+-(void)highlight
 {
-    return [self.textField resignFirstResponder];
+    [super highlight];
+    self.textLabel.textColor = self.formViewController.view.tintColor;
+}
+
+-(void)unhighlight
+{
+    [super unhighlight];
+    [self.formViewController reloadFormRow:self.rowDescriptor];
 }
 
 #pragma mark - Properties
@@ -237,12 +249,14 @@
 
 - (void)textFieldDidBeginEditing:(UITextField *)textField
 {
+    [self.formViewController beginEditing:self.rowDescriptor];
     [self.formViewController textFieldDidBeginEditing:textField];
 }
 
 - (void)textFieldDidEndEditing:(UITextField *)textField
 {
     [self textFieldDidChange:textField];
+    [self.formViewController endEditing:self.rowDescriptor];
     [self.formViewController textFieldDidEndEditing:textField];
 }
 
