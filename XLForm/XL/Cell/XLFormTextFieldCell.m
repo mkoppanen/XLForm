@@ -133,9 +133,8 @@
     
     self.textField.text = self.rowDescriptor.value ? [self.rowDescriptor.value displayText] : self.rowDescriptor.noValueDisplayText;
 
-    [self.textField setEnabled:!self.rowDescriptor.disabled];
-    self.textLabel.textColor  = self.rowDescriptor.disabled ? [UIColor grayColor] : [UIColor blackColor];
-    self.textField.textColor = self.rowDescriptor.disabled ? [UIColor grayColor] : [UIColor blackColor];
+    [self.textField setEnabled:!self.rowDescriptor.isDisabled];
+    self.textField.textColor = self.rowDescriptor.isDisabled ? [UIColor grayColor] : [UIColor blackColor];
     
     self.textLabel.font = [self.rowDescriptor.sectionDescriptor.formDescriptor boldFont];
     self.textField.font = [self.rowDescriptor.sectionDescriptor.formDescriptor regularFont];

@@ -44,6 +44,7 @@
     [super update];
     self.textLabel.text = self.rowDescriptor.title;
     self.switchControl.on = [self.rowDescriptor.value boolValue];
+    self.switchControl.enabled = !self.rowDescriptor.isDisabled;
 
     self.textLabel.font = [self.rowDescriptor.sectionDescriptor.formDescriptor boldFont];
     
