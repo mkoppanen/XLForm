@@ -2,7 +2,7 @@
 //  XLFormDescriptor.h
 //  XLForm ( https://github.com/xmartlabs/XLForm )
 //
-//  Copyright (c) 2014 Xmartlabs ( http://xmartlabs.com )
+//  Copyright (c) 2015 Xmartlabs ( http://xmartlabs.com )
 //
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -87,7 +87,6 @@ typedef NS_OPTIONS(NSUInteger, XLFormRowNavigationOptions) {
 -(XLFormRowDescriptor *)formRowAtIndex:(NSIndexPath *)indexPath;
 -(XLFormRowDescriptor *)formRowWithHash:(NSUInteger)hash;
 -(XLFormSectionDescriptor *)formSectionAtIndex:(NSUInteger)index;
-
 
 -(NSIndexPath *)indexPathOfFormRow:(XLFormRowDescriptor *)formRow;
 
