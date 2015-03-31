@@ -72,8 +72,6 @@
                 else{
                     [descriptionArray addObject:[option displayText]];
                 }
-                
-                
             }
         }
         return [descriptionArray componentsJoinedByString:@", "];
@@ -177,9 +175,7 @@
                 if (self.popoverController && self.popoverController.popoverVisible) {
                     [self.popoverController dismissPopoverAnimated:NO];
                 }
-                
-                UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:selectorViewController];
-                self.popoverController = [[UIPopoverController alloc] initWithContentViewController:navigationController];
+                self.popoverController = [[UIPopoverController alloc] initWithContentViewController:selectorViewController];
                 self.popoverController.delegate = self;
                 if ([selectorViewController conformsToProtocol:@protocol(XLFormRowDescriptorPopoverViewController)]){
                     ((id<XLFormRowDescriptorPopoverViewController>)selectorViewController).popoverController = self.popoverController;
