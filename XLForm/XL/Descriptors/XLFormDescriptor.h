@@ -28,8 +28,8 @@
 #import "XLFormDescriptorDelegate.h"
 #import <Foundation/Foundation.h>
 
-NSString * const XLFormErrorDomain;
-NSString * const XLValidationStatusErrorKey;
+extern NSString * const XLFormErrorDomain;
+extern NSString * const XLValidationStatusErrorKey;
 
 typedef NS_ENUM(NSInteger, XLFormErrorCode)
 {
@@ -82,7 +82,6 @@ typedef NS_OPTIONS(NSUInteger, XLFormRowNavigationOptions) {
 -(void)removeFormRow:(XLFormRowDescriptor *)formRow;
 -(void)removeFormRowWithTag:(NSString *)tag;
 
-
 -(XLFormRowDescriptor *)formRowWithTag:(NSString *)tag;
 -(XLFormRowDescriptor *)formRowAtIndex:(NSIndexPath *)indexPath;
 -(XLFormRowDescriptor *)formRowWithHash:(NSUInteger)hash;
@@ -98,5 +97,7 @@ typedef NS_OPTIONS(NSUInteger, XLFormRowNavigationOptions) {
 
 -(XLFormRowDescriptor *)nextRowDescriptorForRow:(XLFormRowDescriptor *)currentRow;
 -(XLFormRowDescriptor *)previousRowDescriptorForRow:(XLFormRowDescriptor *)currentRow;
+
+-(void)forceEvaluate;
 
 @end
