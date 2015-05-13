@@ -50,7 +50,6 @@
     self.textLabel.font = [self.rowDescriptor.sectionDescriptor.formDescriptor boldFont];
     
     self.textLabel.textColor  = self.rowDescriptor.disabled ? [UIColor grayColor] : [UIColor blackColor];
-    self.switchControl.enabled = !self.rowDescriptor.disabled;
 
 }
 
