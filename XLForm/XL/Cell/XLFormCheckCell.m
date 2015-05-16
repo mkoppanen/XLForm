@@ -40,6 +40,8 @@
 {
     [super update];
     self.textLabel.text = self.rowDescriptor.title;
+    self.accessoryType = [self.rowDescriptor.value boolValue] ? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone;
+
     self.textLabel.font = [self.rowDescriptor.sectionDescriptor.formDescriptor boldFont];
     self.editingAccessoryType =  self.accessoryType;
 
