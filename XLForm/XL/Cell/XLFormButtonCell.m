@@ -53,7 +53,6 @@
     self.selectionStyle = isDisabled ? UITableViewCellSelectionStyleNone : UITableViewCellSelectionStyleDefault;
 
     self.textLabel.font = [self.rowDescriptor.sectionDescriptor.formDescriptor boldFont];
-    self.textLabel.textColor  = self.rowDescriptor.disabled ? [UIColor grayColor] : [UIColor blackColor];
 }
 
 
