@@ -88,12 +88,12 @@ NSString * const XLValidationStatusErrorKey = @"XLValidationStatusErrorKey";
 
 +(instancetype)formDescriptor
 {
-    return [self formDescriptorWithTitle:nil];
+    return [[self class] formDescriptorWithTitle:nil];
 }
 
 +(instancetype)formDescriptorWithTitle:(NSString *)title
 {
-    return [[XLFormDescriptor alloc] initWithTitle:title];
+    return [[[self class] alloc] initWithTitle:title];
 }
 
 #pragma mark - Fonts
@@ -579,7 +579,9 @@ NSString * const XLValidationStatusErrorKey = @"XLValidationStatusErrorKey";
 
 -(void)removeRowFromTagCollection:(XLFormRowDescriptor *)rowDescriptor
 {
-    [self.allRowsByTag removeObjectForKey:rowDescriptor.tag];
+    if (rowDescriptor.tag){
+        [self.allRowsByTag removeObjectForKey:rowDescriptor.tag];
+    }
 }
 
 
@@ -639,11 +641,9 @@ NSString * const XLValidationStatusErrorKey = @"XLValidationStatusErrorKey";
                 descriptor = ((XLFormRowDescriptor*)sectionOrRow).tag;
                 predicate = ((XLFormRowDescriptor*)sectionOrRow).disabled;
             }
-            else return;
-            
             break;
     }
-    if ([predicate isKindOfClass:[NSPredicate class] ]) {
+    if (descriptor && [predicate isKindOfClass:[NSPredicate class] ]) {
         NSMutableArray* tags = [predicate getPredicateVars];
         for (NSString* tag in tags) {
             NSString* auxTag = [tag formKeyForPredicateType:predicateType];
