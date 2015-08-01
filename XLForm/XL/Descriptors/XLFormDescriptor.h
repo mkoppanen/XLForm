@@ -56,21 +56,16 @@ typedef NS_OPTIONS(NSUInteger, XLFormRowNavigationOptions) {
 @property (getter=isDisabled) BOOL disabled;
 @property (nonatomic) XLFormRowNavigationOptions rowNavigationOptions;
 
-<<<<<<< HEAD
 @property UIFont *defaultFontRegular;
 @property UIFont *defaultFontBold;
 /// Default is false
 @property BOOL fixedFontSize;
 
-@property (weak) id<XLFormDescriptorDelegate> delegate;
-=======
 @property (weak, nullable) id<XLFormDescriptorDelegate> delegate;
->>>>>>> afcf2071ed1fc7b4979a9c9c77410bcd74aa0d1d
 
 +(nonnull instancetype)formDescriptor;
 +(nonnull instancetype)formDescriptorWithTitle:(nullable NSString *)title;
 
-<<<<<<< HEAD
 -(UIFont *)boldFont;
 -(UIFont *)regularFont;
 
