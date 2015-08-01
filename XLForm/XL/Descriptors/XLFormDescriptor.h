@@ -56,8 +56,8 @@ typedef NS_OPTIONS(NSUInteger, XLFormRowNavigationOptions) {
 @property (getter=isDisabled) BOOL disabled;
 @property (nonatomic) XLFormRowNavigationOptions rowNavigationOptions;
 
-@property UIFont *defaultFontRegular;
-@property UIFont *defaultFontBold;
+@property (nullable) UIFont *defaultFontRegular;
+@property (nullable) UIFont *defaultFontBold;
 /// Default is false
 @property BOOL fixedFontSize;
 
@@ -69,14 +69,6 @@ typedef NS_OPTIONS(NSUInteger, XLFormRowNavigationOptions) {
 -(UIFont *)boldFont;
 -(UIFont *)regularFont;
 
--(void)addFormSection:(XLFormSectionDescriptor *)formSection;
--(void)addFormSection:(XLFormSectionDescriptor *)formSection atIndex:(NSUInteger)index;
--(void)addFormSection:(XLFormSectionDescriptor *)formSection afterSection:(XLFormSectionDescriptor *)afterSection;
--(void)addFormRow:(XLFormRowDescriptor *)formRow beforeRow:(XLFormRowDescriptor *)afterRow;
--(void)addFormRow:(XLFormRowDescriptor *)formRow beforeRowTag:(NSString *)afterRowTag;
--(void)addFormRow:(XLFormRowDescriptor *)formRow afterRow:(XLFormRowDescriptor *)afterRow;
--(void)addFormRow:(XLFormRowDescriptor *)formRow afterRowTag:(NSString *)afterRowTag;
-=======
 -(void)addFormSection:(nonnull XLFormSectionDescriptor *)formSection;
 -(void)addFormSection:(nonnull XLFormSectionDescriptor *)formSection atIndex:(NSUInteger)index;
 -(void)addFormSection:(nonnull XLFormSectionDescriptor *)formSection afterSection:(nonnull XLFormSectionDescriptor *)afterSection;
@@ -84,7 +76,6 @@ typedef NS_OPTIONS(NSUInteger, XLFormRowNavigationOptions) {
 -(void)addFormRow:(nonnull XLFormRowDescriptor *)formRow beforeRowTag:(nonnull NSString *)afterRowTag;
 -(void)addFormRow:(nonnull XLFormRowDescriptor *)formRow afterRow:(nonnull XLFormRowDescriptor *)afterRow;
 -(void)addFormRow:(nonnull XLFormRowDescriptor *)formRow afterRowTag:(nonnull NSString *)afterRowTag;
->>>>>>> afcf2071ed1fc7b4979a9c9c77410bcd74aa0d1d
 -(void)removeFormSectionAtIndex:(NSUInteger)index;
 -(void)removeFormSection:(nonnull XLFormSectionDescriptor *)formSection;
 -(void)removeFormRow:(nonnull XLFormRowDescriptor *)formRow;
