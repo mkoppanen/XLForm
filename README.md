@@ -10,7 +10,7 @@ Purpose
 
 XLForm is the most flexible and powerful iOS library to create dynamic table-view forms. The goal of the library is to get the same power of hand-made forms but spending 1/10 of the time.
 
-XLForm provides a very powerful DSL used to create a form. It keeps track of this specification on runtime, updating the UI on the fly.
+XLForm provides a very powerful DSL (Domain Specific Language) used to create a form. It keeps track of this specification on runtime, updating the UI on the fly.
 
 #####Let's see the iOS Calendar Event Form created using XLForm
 
@@ -379,6 +379,18 @@ XLForms supports counting using UIStepper control:
 ```objc
 static NSString *const XLFormRowDescriptorTypeStepCounter = @"stepCounter";
 ```
+
+You can set the stepper paramaters easily:
+
+```objc
+	row = [XLFormRowDescriptor formRowDescriptorWithTag:kStepCounter rowType:XLFormRowDescriptorTypeStepCounter title:@"Step counter"];
+	row.value = @50;
+	[row.cellConfigAtConfigure setObject:@YES forKey:@"stepControl.wraps"];
+	[row.cellConfigAtConfigure setObject:@10 forKey:@"stepControl.stepValue"];
+	[row.cellConfigAtConfigure setObject:@10 forKey:@"stepControl.minimumValue"];
+	[row.cellConfigAtConfigure setObject:@100 forKey:@"stepControl.maximumValue"];
+```
+
 #####Slider
 
 XLForms supports counting using UISlider control:
@@ -687,7 +699,7 @@ To make the appearance and disappearance of rows and sections automatic, there i
 @property id hidden;
 ```
 
-This id object will normally be a NSPredicate or a NSNumber containing a BOOL. It can be set using  any of them or eventually a NSString from which a NSPredicate will be created. In order for this to work the string has to be sintactically correct.
+This id object will normally be a NSPredicate or a NSNumber containing a BOOL. It can be set using  any of them or eventually a NSString from which a NSPredicate will be created. In order for this to work the string has to be syntactically correct.
 
 For example, you could set the following string to a row (`second`) to make it disappear when a previous row (`first`) contains the value "hide".
 
@@ -873,6 +885,19 @@ if let fullName = form.formRowWithTag(tag.fullName).value as? String {
 }
 ```
 
+#### How to change UITextField length
+
+You can change the length of a UITextField using the `cellConfigAtConfigure` dictionary property. This value refers to the percentage in relation to the table view cell.
+
+**Objective C**
+```objc
+[row.cellConfigAtConfigure setObject:[NSNumber numberWithFloat:0.7] forKey:XLFormTextFieldLengthPercentage];
+```
+**Swift**
+```Swift
+row.cellConfigAtConfigure.setObject(0.7, forKey:XLFormTextFieldLengthPercentage)
+```
+
 #### How to change a UITableViewCell font
 
 You can change the font or any other table view cell property using the `cellConfig` dictionary property. XLForm will set up `cellConfig` dictionary values when the table view cell is about to be displayed.
@@ -977,12 +1002,35 @@ Requirements
 
 * ARC
 * iOS 7.0 and above
+* XCode 6.3+
 
 
 Release Notes
 --------------
 
-Version 3.0.0 (master)
+Version 3.0.2 (master)
+* Fix issue when inline pickers expand beyond table.
+
+Version 3.0.1
+
+* Improvements and bug fixes.
+* Ability to left, right align textfields. Ability to set up a minimum textField width.
+* If form is being shown, assigning a new form automatically reload the tableview.
+* Update objective-c and swift example projects.
+* Swift compatibility fixes.
+* Long email validation added.
+* Fixed row copy issue, now valueTransformer value is copied.
+* Fixed step counter row layout issues.
+* Fixed issue "Last form field hides beneath enabled navigation controller's toolbar".
+* Fixed issue "Navigating between cells using bottom navigation buttons causes table cell dividers to disappear".
+* Use UIAlertController instead UIActionSheet/UIAlertView if possible.
+* Hidden and disabled rows resign first responder before changing state.
+* onChangeBlock added to rowDescriptor.
+* use tintColor as default button row color.
+* By default accessoryView is no longer shown for inline rows.
+* Fix NSBundle issues to use XLForm as dynamic framework.
+
+Version 3.0.0
 
 * `hidden`, `disable` properties added to `XLFormRowDescriptor`. `@YES` `@NO` or a `NSPredicate` can be used to hide, disable de row.
 * `hidden` property added to `XLFormSectionDescriptor`. `@YES` `@NO` or a `NSPredicate` can be used to hide the section.

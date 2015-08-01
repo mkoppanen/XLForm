@@ -42,6 +42,9 @@
 
 -(BOOL)becomeFirstResponder
 {
+    if (self.isFirstResponder){
+        return [super becomeFirstResponder];
+    }
     _beforeChangeColor = self.detailTextLabel.textColor;
     BOOL result = [super becomeFirstResponder];
     if (result){
@@ -51,6 +54,7 @@
         UITableViewCell<XLFormInlineRowDescriptorCell> * inlineCell = (UITableViewCell<XLFormInlineRowDescriptorCell> *)cell;
         inlineCell.inlineRowDescriptor = self.rowDescriptor;
         [self.rowDescriptor.sectionDescriptor addFormRow:inlineRowDescriptor afterRow:self.rowDescriptor];
+        [self.formViewController ensureRowIsVisible:inlineRowDescriptor];
     }
     return result;
 }

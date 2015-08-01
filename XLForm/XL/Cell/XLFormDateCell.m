@@ -59,6 +59,9 @@
 
 -(BOOL)becomeFirstResponder
 {
+    if (self.isFirstResponder){
+        return [super becomeFirstResponder];
+    }
     _beforeChangeColor = self.detailTextLabel.textColor;
     BOOL result = [super becomeFirstResponder];
     if (result){
@@ -78,6 +81,7 @@
             inlineCell.inlineRowDescriptor = self.rowDescriptor;
             
             [formSection addFormRow:datePickerRowDescriptor afterRow:self.rowDescriptor];
+            [self.formViewController ensureRowIsVisible:datePickerRowDescriptor];
         }
     }
     return result;
