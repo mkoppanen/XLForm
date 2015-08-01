@@ -66,8 +66,8 @@ typedef NS_OPTIONS(NSUInteger, XLFormRowNavigationOptions) {
 +(nonnull instancetype)formDescriptor;
 +(nonnull instancetype)formDescriptorWithTitle:(nullable NSString *)title;
 
--(UIFont *)boldFont;
--(UIFont *)regularFont;
+-(nullable UIFont *)boldFont;
+-(nullable UIFont *)regularFont;
 
 -(void)addFormSection:(nonnull XLFormSectionDescriptor *)formSection;
 -(void)addFormSection:(nonnull XLFormSectionDescriptor *)formSection atIndex:(NSUInteger)index;
