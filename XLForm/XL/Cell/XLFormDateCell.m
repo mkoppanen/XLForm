@@ -231,7 +231,7 @@
 - (void)datePickerValueChanged:(UIDatePicker *)sender
 {
     self.rowDescriptor.value = sender.date;
-    self.detailTextLabel.text = [self valueDisplayText];
+    [self update];
     [self setNeedsLayout];
     
 }
